@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Novel Fiksi - Perpustakaan Digital</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* [Gunakan Style CSS dasar, Navbar, dan Filter dari koleksi.html] */
+        :root { --bg-main: #F0F0F0; --purple-dark: #1E1450; --card-bg: #EAEAEA; }
+        body { margin: 0; font-family: 'Poppins', sans-serif; background-color: var(--bg-main); display: flex; flex-direction: column; min-height: 100vh; }
+        .navbar { background-color: var(--purple-dark); color: white; display: flex; align-items: center; padding: 15px 30px; margin: 10px; border-radius: 15px; gap: 30px; }
+        .navbar .logo { font-weight: 700; font-size: 18px; }
+        .nav-links { display: flex; gap: 20px; flex-grow: 1; }
+        .nav-links a { color: #aaa; text-decoration: none; font-size: 14px; }
+        .nav-links a.active { color: white; font-weight: bold; }
+        .user-icon { background: white; color: var(--purple-dark); width: 30px; height: 30px; border-radius: 50%; display: flex; justify-content: center; align-items: center; }
+        
+        .container { padding: 20px 40px; flex-grow: 1; }
+        .filter-bar { display: flex; gap: 15px; margin-bottom: 30px; align-items: center; }
+        .dropdown-buku { background-color: var(--purple-dark); color: white; padding: 12px 20px; border-radius: 8px; border: none; width: 200px; font-family: 'Poppins'; cursor: pointer; }
+        .search-box { flex-grow: 1; display: flex; align-items: center; background: white; border-radius: 8px; padding: 5px; border: 1px solid #ccc; }
+        .search-box input { border: none; outline: none; width: 100%; padding: 10px; font-family: 'Poppins'; }
+        .btn-search { background-color: var(--purple-dark); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
+
+        /* Style Kartu Buku */
+        .book-card { background-color: var(--card-bg); border-radius: 15px; display: flex; padding: 20px; margin-bottom: 20px; align-items: center; gap: 25px; }
+        .book-cover { width: 120px; height: 180px; background-color: #ddd; border-radius: 10px; object-fit: cover; }
+        .book-details { flex-grow: 1; }
+        .book-details h3 { margin: 0 0 10px 0; font-size: 18px; color: #333; }
+        .book-details table { font-size: 13px; color: #555; }
+        .book-details table td { padding: 4px 0; }
+        .book-details table td:first-child { width: 100px; font-weight: 600; }
+        .btn-pinjam { background-color: var(--purple-dark); color: white; border: none; padding: 12px 30px; border-radius: 8px; font-weight: 600; cursor: pointer; font-family: 'Poppins'; }
+
+        /* Style Modal */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center; }
+        .modal-content { background-color: #F5F5F5; border-radius: 15px; width: 450px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .modal-header { background-color: var(--purple-dark); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; font-weight: 600; }
+        .close-btn { background: white; color: var(--purple-dark); border: none; width: 25px; height: 25px; cursor: pointer; font-weight: bold; }
+        .modal-body { padding: 30px; }
+        .modal-body label { display: block; margin-bottom: 8px; font-size: 14px; font-weight: 600; }
+        .modal-body input { width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
+        .btn-modal-login { background-color: #E0E0E0; border: none; padding: 10px 30px; border-radius: 20px; font-weight: 600; cursor: pointer; float: right; }
+        
+        footer { background-color: var(--purple-dark); color: white; padding: 40px; margin-top: auto; display: flex; justify-content: space-between; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="logo">📖 Perpustakaan Digital</div>
+        <div class="nav-links">
+            <a href="beranda.html">Beranda</a>
+            <a href="koleksi.html" class="active">Koleksi</a>
+        </div>
+        <div class="user-icon">👤</div>
+    </nav>
+
+    <div class="container">
+        <div class="filter-bar">
+            <!-- Dropdown di sini default-nya menampilkan "Novel Fiksi" -->
+            <select class="dropdown-buku" id="dropdownKategori" onchange="pindahKategori()">
+                <option value="novel_fiksi.html" selected>Novel Fiksi</option>
+                <option value="novel_nonfiksi.html">Novel Nonfiksi</option>
+                <option value="buku_pelajaran.html">Buku Pelajaran</option>
+            </select>
+            <div class="search-box">
+                <span style="padding: 0 10px;">🔍</span>
+                <input type="text" id="kolomCariBuku" placeholder="Cari Judul / Penulis..." onkeyup="cariKoleksiBuku()">
+                <button class="btn-search">Search</button>
+            </div>
+        </div>
+
+        <!-- Daftar Buku -->
+        <div class="book-card">
+            <img src="Hujan.png" class="book-cover" alt="Cover Hujan">
+            <div class="book-details">
+                <h3>Hujan</h3>
+                <table>
+                    <tr><td>Penulis</td><td>: Tere Liye</td></tr>
+                    <tr><td>Penerbit</td><td>: Gramedia & Sabak Grip Nusantara</td></tr>
+                    <tr><td>Genre</td><td>: Fiksi Ilmiah (Sci-Fi), Romansa, Drama</td></tr>
+                    <tr><td>ID Buku</td><td>: 001</td></tr>
+                    <tr><td>Ketersediaan</td><td>: 2</td></tr>
+                </table>
+            </div>
+            <!-- Tombol memicu modal -->
+            <button class="btn-pinjam" onclick="openModal('loginModal')">PINJAM</button>
+        </div>
+        
+        <div class="book-card">
+            <img src="https://cdn.gramedia.com/uploads/items/9789793062792_New-Edition-Laskar-Pelangi.jpg" class="book-cover" alt="Cover Laskar Pelangi">
+            <div class="book-details">
+                <h3>Laskar Pelangi</h3>
+                <table>
+                    <tr><td>Penulis</td><td>: Andrea Hirata</td></tr>
+                    <tr><td>Penerbit</td><td>: Bentang Pustaka</td></tr>
+                    <tr><td>Genre</td><td>: Drama, Romansa (Romance), Edukasi</td></tr>
+                    <tr><td>ID Buku</td><td>: 002</td></tr>
+                    <tr><td>Ketersediaan</td><td>: 2</td></tr>
+                </table>
+            </div>
+            <button class="btn-pinjam" onclick="openModal('loginModal')">PINJAM</button>
+        </div>
+
+        <div class="book-card">
+            <img src="https://cdn.gramedia.com/uploads/items/ID_MIZ2016MTH03PKER_C.jpg" class="book-cover" alt="Cover Hujan">
+            <div class="book-details">
+                <h3>Perahu Kertas</h3>
+                <table>
+                    <tr><td>Penulis</td><td>: Dee Lestari</td></tr>
+                    <tr><td>Penerbit</td><td>: Bentang Pustaka & Truedee Books</td></tr>
+                    <tr><td>Genre</td><td>: Novel Remaja (Young Adult)</td></tr>
+                    <tr><td>ID Buku</td><td>: 003</td></tr>
+                    <tr><td>Ketersediaan</td><td>: 2</td></tr>
+                </table>
+            </div>
+            <!-- Tombol memicu modal -->
+            <button class="btn-pinjam" onclick="openModal('loginModal')">PINJAM</button>
+        </div>
+    </div>
+
+    <footer>
+        <div><h4>📖 Perpustakaan Digital</h4><p>📍 Location</p><p>📞 Phone Number</p></div>
+        <div style="display: flex; gap: 20px; align-items: center; position: relative; z-index: 9999; pointer-events: auto;">
+    
+            <a href="https://www.instagram.com/username_kamu" target="_blank" style="color: white; text-decoration: none; font-size: 24px; transition: 0.3s; display: inline-block; cursor: pointer;">
+                <i class="fab fa-instagram"></i>
+            </a> 
+
+            <a href="https://youtube.com/@nadiahidayatullah5863?si=4iEeLkSxTdT-pxcO" target="_blank" style="color: white; text-decoration: none; font-size: 24px; transition: 0.3s; display: inline-block; cursor: pointer;">
+                <i class="fab fa-youtube"></i>
+            </a> 
+
+            <a href="mailto:perpusdigital@gmail.com" style="color: white; text-decoration: none; display: flex; align-items: center; gap: 8px; font-family: 'Poppins', sans-serif; transition: 0.3s; cursor: pointer;">
+                <i class="far fa-envelope" style="font-size: 24px;"></i>
+                <span style="font-size: 14px; font-weight: 600;">perpusdigital@gmail.com</span>
+            </a>
+            
+        </div>   
+    </footer>
+
+    <!-- MODAL LOGIN -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>Log In</span>
+                <!-- Tombol silang untuk menutup modal -->
+                <button class="close-btn" onclick="closeModal('loginModal')">X</button>
+            </div>
+            <div class="modal-body">
+                <label>Nomor Kartu Perpustakaan:</label>
+                <input type="text">
+                <label>PIN/Password:</label>
+                <input type="password">
+                <button class="btn-modal-login" onclick="showQR()">LOGIN</button>
+                <div style="clear: both;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL QR CODE -->
+    <div id="qrModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>QR CODE</span>
+                <button class="close-btn" onclick="closeModal('qrModal')">X</button>
+            </div>
+            <div class="modal-body" style="text-align: center; height: 300px; display: flex; align-items: center; justify-content: center; background: #EAEAEA;">
+                <p style="color: #888;">[Tempat QR Code di-generate]</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Logika Dropdown Pindah Halaman
+        function pindahKategori() {
+            var urlTujuan = document.getElementById("dropdownKategori").value;
+            window.location.href = urlTujuan;
+        }
+
+        // Logika Buka/Tutup Modal
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        
+        // Logika pindah dari Login ke QR Code
+        function showQR() {
+            closeModal('loginModal');
+            openModal('qrModal');
+        }
+
+            // FUNGSI LIVE SEARCH UNTUK CARD BUKU USER
+        // ==========================================
+        function cariKoleksiBuku() {
+            // 1. Ambil kata yang diketik (huruf kecil)
+            let input = document.getElementById("kolomCariBuku").value.toLowerCase();
+            
+            // 2. Ambil semua elemen HTML yang memiliki class 'book-card'
+            let cards = document.getElementsByClassName("book-card");
+
+            // 3. Looping untuk mengecek masing-masing buku
+            for (let i = 0; i < cards.length; i++) {
+                // Ambil teks judul buku (ada di dalam tag h3)
+                let judulBuku = cards[i].querySelector("h3").innerText.toLowerCase();
+                
+                // Ambil teks penulis/detail lainnya (opsional jika ingin bisa cari penulis juga)
+                let detailBuku = cards[i].innerText.toLowerCase();
+
+                // Jika kata yang diketik cocok dengan judul atau detail lainnya
+                if (judulBuku.includes(input) || detailBuku.includes(input)) {
+                    // Tampilkan kartu buku (karena di CSS kita pakai display: flex)
+                    cards[i].style.display = "flex"; 
+                } else {
+                    // Sembunyikan kartu buku jika tidak cocok
+                    cards[i].style.display = "none"; 
+                }
+            }
+        }
+    </script>
+</body>
+</html>

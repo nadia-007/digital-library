@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard Admin</title>
+    <link rel="stylesheet" href="admin_style.css">
+    <style>
+        .dashboard-cards { display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; margin-top: 40px;}
+        .dash-card { width: 300px; height: 180px; border-radius: 15px; color: white; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.2); text-decoration: none;}
+        .card-body { flex-grow: 1; display: flex; justify-content: center; align-items: center; font-size: 24px; font-weight: bold; gap: 10px;}
+        .card-footer { background-color: rgba(0,0,0,0.2); text-align: center; padding: 10px; font-size: 12px;}
+        
+        .card-buku { background-color: #1A0D6B; }
+        .card-anggota { background-color: #721C24; }
+        .card-pinjam { background-color: #155724; }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="profile-section">
+            <div class="profile-icon">👤</div>
+            <div id="namaAdminTampil" style="font-weight: bold; font-size: 18px; text-transform: uppercase;">PERSON</div>
+            <div class="role-badge">Administrator</div>
+        </div>
+        <ul class="menu">
+            <a href="admin_dashboard.html" class="active">📊 Dashboard</a>
+            <a href="admin_buku.html">📖 Kelola Data</a>
+            <a href="admin_anggota.html">👥 Log Data</a>
+            <a href="admin_peminjaman.html">📄 Laporan</a>
+        </ul>
+        <a href="#" onclick="prosesLogout()" class="logout">🚪 Log Out</a>
+    </div>
+
+    <div class="main-wrapper">
+        <div class="top-navbar">☰</div>
+        <div class="content-area">
+            <div class="card-box" style="background: transparent; box-shadow: none;">
+                <h2 class="page-title">DASHBOARD</h2>
+                
+                <div class="dashboard-cards">
+                    <a href="admin_buku.html" class="dash-card card-buku">
+                        <div class="card-body">📖 BUKU</div>
+                        <div class="card-footer">More Information ➔</div>
+                    </a>
+                    
+                    <a href="admin_anggota.html" class="dash-card card-anggota">
+                        <div class="card-body">👤+ ANGGOTA</div>
+                        <div class="card-footer">More Information ➔</div>
+                    </a>
+                    
+                    <a href="admin_peminjaman.html" class="dash-card card-pinjam">
+                        <div class="card-body">📄 PEMINJAMAN</div>
+                        <div class="card-footer">More Information ➔</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        <script>
+                // ==========================================
+            // SISTEM PROTEKSI HALAMAN & NAMA ADMIN
+            // ==========================================
+            document.addEventListener("DOMContentLoaded", function() {
+                // Ambil nama admin dari memori browser
+                let adminAktif = localStorage.getItem("namaAdminAktif");
+
+                // Jika kosong (artinya dia belum login / paksa masuk lewat link)
+                if (!adminAktif) {
+                    alert("Akses Ilegal! Anda harus Login terlebih dahulu.");
+                    window.location.href = "admin_login.html"; // Tendang balik ke halaman login
+                } else {
+                    // Jika sudah login, ganti tulisan PERSON menjadi nama yang diketik saat login
+                    document.getElementById("namaAdminTampil").innerText = adminAktif;
+                }
+            });
+
+            // FUNGSI LOGOUT
+            function prosesLogout() {
+                // Hapus memori nama admin
+                localStorage.removeItem("namaAdminAktif");
+                // Kembalikan ke halaman login
+                window.location.href = "admin_login.html";
+            }
+        </script>
+</body>
+</html>

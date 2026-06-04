@@ -1,0 +1,62 @@
+/* admin_style.css */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+:root {
+    --purple-dark: #1E1450;
+    --sidebar-bg: #2B2B36;
+    --sidebar-hover: #3C3C4A;
+    --bg-main: #EAEAEA;
+    --btn-green: #4CAF50;
+    --btn-red: #F44336;
+    --orange-badge: #FF9800;
+}
+
+body {
+    margin: 0; padding: 0;
+    font-family: 'Poppins', sans-serif;
+    display: flex; height: 100vh;
+    background-color: var(--bg-main);
+    overflow: hidden;
+}
+
+/* --- SIDEBAR --- */
+.sidebar {
+    width: 250px; background-color: var(--sidebar-bg); color: #ccc;
+    display: flex; flex-direction: column; box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    z-index: 10;
+}
+.profile-section { background-color: var(--purple-dark); padding: 20px; text-align: center; color: white; border-bottom: 2px solid #444; }
+.profile-icon { font-size: 50px; background: white; color: var(--purple-dark); border-radius: 50%; width: 70px; height: 70px; display: inline-flex; justify-content: center; align-items: center; margin-bottom: 10px; }
+.role-badge { background-color: var(--orange-badge); color: white; padding: 5px 15px; border-radius: 15px; font-size: 12px; font-weight: bold; margin-top: 5px; display: inline-block;}
+.menu { list-style: none; padding: 0; margin: 20px 0; flex-grow: 1; }
+.menu a { text-decoration: none; color: #ccc; display: block; padding: 15px 20px; border-left: 4px solid transparent; transition: 0.3s; font-size: 14px;}
+.menu a:hover, .menu a.active { background-color: var(--sidebar-hover); border-left: 4px solid var(--orange-badge); color: white; }
+.logout { padding: 15px 20px; cursor: pointer; border-top: 1px solid #444; color: #ccc; text-decoration: none; display: block;}
+
+/* --- MAIN CONTENT & NAVBAR KECIL --- */
+.main-wrapper { flex-grow: 1; display: flex; flex-direction: column; width: calc(100% - 250px);}
+.top-navbar { background-color: var(--purple-dark); height: 50px; display: flex; align-items: center; padding: 0 20px; color: white; font-size: 20px;}
+.content-area { padding: 30px; overflow-y: auto; flex-grow: 1; }
+
+.page-title { text-align: center; color: var(--purple-dark); margin-top: 0; margin-bottom: 20px; font-weight: 700; font-size: 24px;}
+
+/* --- KOTAK KONTEN (Tabel / Form) --- */
+.card-box { background: white; border-radius: 10px; padding: 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+.header-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.btn-tambah { background-color: var(--purple-dark); color: white; padding: 10px 25px; border-radius: 20px; border: none; font-weight: 600; cursor: pointer; font-family: 'Poppins';}
+.search-box { padding: 10px 15px; border: 1px solid #ccc; border-radius: 20px; outline: none; width: 250px; font-family: 'Poppins';}
+
+/* --- TABEL --- */
+table { width: 100%; border-collapse: collapse; text-align: center; font-size: 13px; }
+th { background-color: var(--purple-dark); color: white; padding: 12px; border: 1px solid #ddd; }
+td { padding: 12px; border: 1px solid #ddd; background-color: #FDFDFD; color: #333;}
+.btn-action { padding: 8px 12px; border: none; border-radius: 5px; color: white; cursor: pointer; margin: 0 2px; }
+.btn-edit { background-color: var(--btn-green); }
+.btn-delete { background-color: var(--btn-red); }
+
+/* --- FORM TAMBAH DATA --- */
+.form-group { margin-bottom: 15px; }
+.form-group label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 14px; color: #333;}
+.form-group input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-family: 'Poppins'; outline: none;}
+.btn-simpan { background-color: var(--purple-dark); color: white; padding: 10px 30px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; margin-right: 10px;}
+.btn-batal { background-color: var(--orange-badge); color: white; padding: 10px 30px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;}
