@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Koleksi - Perpustakaan Digital</title>
+    <link rel="stylesheet" href="style.css"> 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">📖 Perpustakaan Digital</div>
+        <div class="nav-links">
+            <a href="beranda.html">Beranda</a>
+            <a href="koleksi.html" class="active">Koleksi</a>
+        </div>
+        <div class="user-icon">👤</div>
+    </nav>
+
+    <div class="container">
+        <div class="filter-bar">
+            <select class="dropdown-buku" id="filterKategori" onchange="filterBerdasarkanKategori()">
+                <option value="" disabled selected>Buku Berdasarkan</option>
+                <option value="semua">Semua Buku</option> 
+                <option value="fiksi">Novel Fiksi</option>
+                <option value="nonfiksi">Novel Nonfiksi</option>
+                <option value="pelajaran">Buku Pelajaran</option>
+            </select>
+            
+            <div class="search-box">
+                <span style="padding: 0 10px;">🔍</span>
+                <input type="text" id="kolomCariBuku" placeholder="Cari Judul, Pengarang, ID..." onkeyup="cariKoleksiBuku()">
+                <button class="btn-search">Search</button>
+            </div>
+        </div>
+
+        <div id="pesanAwal" style="text-align: center; margin-top: 150px; color: #aaa; font-size: 24px; font-weight: 700;">
+            Pilih terlebih dahulu jenis<br>bacaan yang ingin dipinjam
+        </div>
+
+        <div id="daftarBukuContainer" style="display: none; flex-direction: column; gap: 20px;">
+        </div>
+    </div>
+
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>Log In</span>
+                <button class="close-btn" onclick="closeModal('loginModal')">X</button>
+            </div>
+            <div class="modal-body">
+                <label>Nomor Kartu Perpustakaan:</label>
+                <input type="text" id="inNomorKartu">
+                <label>PIN/Password:</label>
+                <input type="password" id="inPin">
+                <button class="btn-modal-login" onclick="showQR()">LOGIN</button>
+                <div style="clear: both;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="qrModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>QR CODE</span>
+                <button class="close-btn" onclick="closeModal('qrModal')">X</button>
+            </div>
+            <div class="modal-body" style="text-align: center; height: 300px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #EAEAEA;">
+                <p style="color: #333; font-weight: bold; margin-bottom: 20px;">Tunjukkan QR Code ini kepada Staf</p>
+                <div style="width: 150px; height: 150px; background: white; padding: 10px; border-radius: 10px; border: 2px dashed #888; display: flex; justify-content: center; align-items: center;">
+                    <span style="font-size: 50px;">📱</span>
+                </div>
+                <p style="color: #888; margin-top: 20px; font-size: 12px;" id="teksQrData">[Data Generated]</p>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div><h4>Perpustakaan Digital</h4> <p>📍 Location</p> <p>📞 Phone Number</p></div>
+        <div style="display: flex; gap: 15px; align-items: flex-end; position: relative; z-index: 9999; pointer-events: auto;">
+            <a href="https://www.instagram.com/username_kamu" target="_blank" style="color: white; text-decoration: none; font-size: 15px; transition: 0.3s; display: inline-block; cursor: pointer;">
+                <i class="fab fa-instagram"></i>
+            </a> 
+            <a href="https://youtube.com/@nadiahidayatullah5863?si=4iEeLkSxTdT-pxcO" target="_blank" style="color: white; text-decoration: none; font-size: 15px; transition: 0.3s; display: inline-block; cursor: pointer;">
+                <i class="fab fa-youtube"></i>
+            </a> 
+            <a href="mailto:perpusdigital@gmail.com" style="color: white; text-decoration: none; display: flex; align-items: center; gap: 8px; font-family: 'Poppins', sans-serif; transition: 0.3s; cursor: pointer;">
+                <i class="far fa-envelope" style="font-size: 15px;"></i>
+                <span style="font-size: 14px; font-weight: 500;">perpusdigital@gmail.com</span>
+            </a>
+        </div>   
+    </footer>
+
+    <script>
+        const API_URL = 'http://127.0.0.1:8000/api/buku';
+        let semuaBuku = []; 
+
+        window.onload = async function() {
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/buku');
+                semuaBuku = await response.json();
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                document.getElementById('pesanAwal').innerHTML = "Gagal terhubung ke Database Python.<br>Pastikan server menyala.";
+            }
+        };
+
+        function filterBerdasarkanKategori() {
+            let pilihan = document.getElementById("filterKategori").value;
+            let container = document.getElementById("daftarBukuContainer");
+            let pesanAwal = document.getElementById("pesanAwal");
+            
+            pesanAwal.style.display = "none";
+            container.style.display = "flex";
+            container.innerHTML = ""; 
+
+            let adaBuku = false;
+
+            semuaBuku.forEach((buku) => {
+                let genreLower = buku.genre.toLowerCase();
+                let cocok = false;
+
+                if (pilihan === "semua") {
+                    cocok = true; 
+                } else if (pilihan === "fiksi") {
+                    if (genreLower.includes("fiksi") || genreLower.includes("romansa") || genreLower.includes("drama") || genreLower.includes("remaja")) cocok = true;
+                } else if (pilihan === "nonfiksi") {
+                    if (genreLower.includes("nonfiksi") || genreLower.includes("pengembangan diri") || genreLower.includes("psikologi") || genreLower.includes("filsafat")) cocok = true;
+                } else if (pilihan === "pelajaran") {
+                    if (genreLower.includes("pelajaran") || genreLower.includes("edukasi") || genreLower.includes("sekolah")) cocok = true;
+                }
+
+                if (cocok) {
+                    adaBuku = true;
+                    
+                    // PERBAIKAN: Menyisipkan baris Stok dan Logika Tombol PINJAM/HABIS secara otomatis
+                    let card = `
+                    <div class="book-card">
+                        <img src="http://127.0.0.1:8000/static/img/${buku.id_buku}.jpg" class="book-cover" alt="Cover" onerror="this.src='https://via.placeholder.com/120x180/1E1450/FFFFFF?text=${buku.judul}'">
+                        <div class="book-details">
+                            <h3>${buku.judul}</h3>
+                            <table>
+                                <tr><td>Penulis</td><td>: ${buku.pengarang}</td></tr>
+                                <tr><td>Penerbit</td><td>: ${buku.penerbit}</td></tr>
+                                <tr><td>Genre</td><td>: ${buku.genre}</td></tr>
+                                <tr><td>ID Buku</td><td>: ${buku.id_buku}</td></tr>
+                                <tr>
+                                    <td>Stok Tersedia</td>
+                                    <td>: <span style="font-weight: bold; color: ${buku.stok > 0 ? '#10B981' : '#EF4444'}">${buku.stok || 0} Buku</span></td>
+                                </tr>
+                            </table>
+                        </div>
+                        <button class="btn-pinjam" ${buku.stok > 0 ? '' : 'disabled style="background-color: #888; cursor: not-allowed;"'} onclick="openModal('loginModal', '${buku.id_buku}')">
+                            ${buku.stok > 0 ? 'PINJAM' : 'HABIS'}
+                        </button>
+                    </div>
+                    `;
+                    container.innerHTML += card;
+                }
+            });
+
+            if (!adaBuku) {
+                container.innerHTML = '<div class="empty-message" style="margin-top:50px;">Belum ada buku yang tersedia.</div>';
+            }
+            
+            cariKoleksiBuku();
+        }
+
+        function cariKoleksiBuku() {
+            let input = document.getElementById("kolomCariBuku").value.toLowerCase();
+            let cards = document.getElementsByClassName("book-card");
+
+            if(document.getElementById("pesanAwal").style.display !== "none") { return; }
+
+            for (let i = 0; i < cards.length; i++) {
+                let detailBuku = cards[i].innerText.toLowerCase();
+                if (detailBuku.includes(input)) {
+                    cards[i].style.display = "flex"; 
+                } else {
+                    cards[i].style.display = "none"; 
+                }
+            }
+        }
+
+        let bukuTerpilih = "";
+        function openModal(id, idBuku = "") { 
+            if(idBuku !== "") bukuTerpilih = idBuku;
+            document.getElementById(id).style.display = 'flex'; 
+        }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        function showQR() {
+            let noKartu = document.getElementById('inNomorKartu').value;
+            let pin = document.getElementById('inPin').value;
+            if(!noKartu || !pin) { alert("Nomor Kartu dan PIN wajib diisi!"); return; }
+            document.getElementById('teksQrData').innerText = "ID:" + noKartu + " | BUKU:" + bukuTerpilih;
+            closeModal('loginModal');
+            document.getElementById('qrModal').style.display = 'flex';
+        }
+    </script>
+</body>
+</html>

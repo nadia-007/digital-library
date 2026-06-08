@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Log Data Anggota</title>
+    <link rel="stylesheet" href="admin_style.css">
+</head>
+<body>
+
+    <div class="dashboard-container">
+
+        <div class="sidebar" id="sidebar">
+            <div class="profile-section">
+                <div class="profile-icon">👤</div>
+                <div id="namaAdminTampil" style="font-weight: bold; font-size: 18px; text-transform: uppercase;">PERSON</div>
+                <div class="role-badge">Administrator</div>
+            </div>
+            <ul class="menu">
+                <a href="admin_dashboard.html">📊 Dashboard</a>
+                <a href="admin_buku.html">📖 Kelola Data</a>
+                <a href="admin_anggota.html" class="active">👥 Log Data</a>
+                <a href="admin_peminjaman.html">📄 Laporan</a>
+            </ul>
+            <a href="#" onclick="prosesLogout()" class="logout">🚪 Log Out</a>
+        </div>
+
+        <div class="main-content" id="mainContent">
+            
+            <div class="top-navbar">
+                <span id="hamburgerBtn" onclick="toggleSidebar()">☰</span>
+            </div>
+            
+            <div class="content-area">
+                <div class="card-box">
+                    
+                    <div id="viewTabel">
+                        <h2 class="page-title">DATA ANGGOTA</h2>
+                        <div class="header-actions">
+                            <button class="btn-tambah" onclick="tambahData()">+ Tambah Data</button>
+                            <div style="position: relative; display: flex; align-items: center; gap: 10px;">
+                                <span style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); font-size: 18px; pointer-events: none; z-index: 2;">🔍</span>
+                                
+                                <input type="text" id="kolomCariAnggota" class="search-box" style="padding-left: 45px; width: 280px; height: 40px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-family: 'Poppins', sans-serif;" placeholder="Search ID / Nama Anggota..." onkeyup="handlePencarianAnggota()" autocomplete="off">
+                                
+                                <button class="btn-search" style="background-color: #1A1152; color: white; border: none; padding: 0 25px; height: 40px; border-radius: 8px; font-weight: 600; cursor: pointer; font-family: 'Poppins', sans-serif; transition: 0.3s;" onclick="handlePencarianAnggota()">
+                                    Search
+                                </button>
+                                
+                                <div id="rekomendasiAnggota" style="display: none; position: absolute; top: 100%; left: 0; width: 280px; background: white; border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.15); z-index: 999; max-height: 200px; overflow-y: auto; margin-top: 5px;">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>NO</th><th>ID ANGGOTA</th><th>NAMA</th>
+                                    <th>JENIS KELAMIN</th><th>NO HP</th><th>KELAS</th><th>KELOLA</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelAnggotaBody">
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div id="viewForm" style="display: none;">
+                        <h2 class="page-title" id="formTitle">TAMBAH ANGGOTA</h2>
+                        <div class="form-group"><label>ID ANGGOTA</label><input type="text" id="inIdAnggota"></div>
+                        <div class="form-group"><label>NAMA ANGGOTA</label><input type="text" id="inNama"></div>
+                        <div class="form-group"><label>JENIS KELAMIN</label><input type="text" id="inGender"></div>
+                        <div class="form-group"><label>NO HP</label><input type="text" id="inNoHp"></div>
+                        <div class="form-group"><label>KELAS</label><input type="text" id="inKelas"></div>
+                        
+                        <div style="margin-top: 30px;">
+                            <button class="btn-simpan" onclick="simpanData()">SIMPAN</button>
+                            <button class="btn-batal" onclick="toggleView('viewTabel')">BATAL</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+    
+    <script>
+        let isEditMode = false;
+        const API_URL = 'http://127.0.0.1:8000/api/anggota';
+        let dataAnggotaLokal = []; 
+
+        // SISTEM PROTEKSI HALAMAN & NAMA ADMIN
+        document.addEventListener("DOMContentLoaded", function() {
+            let adminAktif = localStorage.getItem("namaAdminAktif");
+
+            if (!adminAktif) {
+                alert("Akses Ilegal! Anda harus Login terlebih dahulu.");
+                window.location.href = "admin_login.html";
+            } else {
+                document.getElementById("namaAdminTampil").innerText = adminAktif;
+            }
+        });
+
+        // FUNGSI LOGOUT
+        function prosesLogout() {
+            localStorage.removeItem("namaAdminAktif");
+            window.location.href = "admin_login.html";
+        }
+
+        // FUNGSI TOGGLE SIDEBAR
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('collapsed');
+        }
+
+        window.onload = function() {
+            loadDataAnggota();
+            
+            document.addEventListener("click", function(e) {
+                if (e.target.id !== "kolomCariAnggota") {
+                    document.getElementById("rekomendasiAnggota").style.display = "none";
+                }
+            });
+        };
+
+        function toggleView(viewId) {
+            document.getElementById('viewTabel').style.display = 'none';
+            document.getElementById('viewForm').style.display = 'none';
+            document.getElementById(viewId).style.display = 'block';
+        }
+
+        // --- 1. GET: MENGAMBIL DATA ANGGOTA DARI DATABASE ---
+        async function loadDataAnggota() {
+            try {
+                const response = await fetch(API_URL);
+                dataAnggotaLokal = await response.json(); 
+                tampilkanKeTabelAnggota(dataAnggotaLokal);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+
+        function tampilkanKeTabelAnggota(daftarAnggota) {
+            let tbody = document.getElementById('tabelAnggotaBody');
+            tbody.innerHTML = ''; 
+
+            daftarAnggota.forEach((anggota, index) => {
+                let row = `<tr>
+                    <td>${index + 1}</td>
+                    <td>${anggota.id_anggota}</td>
+                    <td>${anggota.nama}</td>
+                    <td>${anggota.jenis_kelamin}</td>
+                    <td>${anggota.no_hp}</td>
+                    <td>${anggota.kelas}</td>
+                    <td>
+                        <button class="btn-action btn-edit" onclick="editData('${anggota.id_anggota}', '${anggota.nama.replace(/'/g, "\\'")}', '${anggota.jenis_kelamin.replace(/'/g, "\\'")}', '${anggota.no_hp.replace(/'/g, "\\'")}', '${anggota.kelas.replace(/'/g, "\\'")}')">✏️</button>
+                        <button class="btn-action btn-delete" onclick="hapusData('${anggota.id_anggota}')">🗑️</button>
+                    </td>
+                </tr>`;
+                tbody.innerHTML += row;
+            });
+        }
+
+        // --- 2. FITUR LIVE SEARCH (PERBAIKAN TYPO SETSARAN) ---
+        function handlePencarianAnggota() {
+            let input = document.getElementById("kolomCariAnggota").value.toLowerCase();
+            let kotakBox = document.getElementById("rekomendasiAnggota");
+            
+            if (input === "") {
+                kotakBox.style.display = "none";
+                tampilkanKeTabelAnggota(dataAnggotaLokal);
+                return;
+            }
+
+            kotakBox.innerHTML = ""; 
+            let setSarana = new Set(); 
+
+            dataAnggotaLokal.forEach(anggota => {
+                if (anggota.id_anggota.toLowerCase().includes(input)) setSarana.add(anggota.id_anggota);
+                if (anggota.nama.toLowerCase().includes(input)) setSarana.add(anggota.nama);
+            });
+
+            if (setSarana.size > 0) {
+                kotakBox.style.display = "block";
+                setSarana.forEach(saran => {
+                    let item = document.createElement("div");
+                    item.innerText = saran;
+                    
+                    item.style.padding = "10px 15px";
+                    item.style.cursor = "pointer";
+                    item.style.fontSize = "13px";
+                    item.style.color = "#333";
+                    item.style.borderBottom = "1px solid #eee";
+                    
+                    item.onmouseover = function() { this.style.background = "#f0f0f0"; };
+                    item.onmouseout = function() { this.style.background = "white"; };
+                    
+                    item.onclick = function() {
+                        document.getElementById("kolomCariAnggota").value = saran;
+                        kotakBox.style.display = "none";
+                        saringTabelAnggota(saran.toLowerCase());
+                    };
+                    kotakBox.appendChild(item);
+                });
+            } else {
+                kotakBox.style.display = "none";
+            }
+
+            saringTabelAnggota(input);
+        }
+
+        function saringTabelAnggota(kataKunci) {
+            let tbody = document.getElementById('tabelAnggotaBody');
+            let tr = tbody.getElementsByTagName("tr");
+
+            for (let i = 0; i < tr.length; i++) {
+                let teksBaris = tr[i].innerText.toLowerCase();
+                if (teksBaris.includes(kataKunci)) {
+                    tr[i].style.display = ""; 
+                } else {
+                    tr[i].style.display = "none"; 
+                }
+            }
+        }
+
+        // --- 3. KLIK TOMBOL TAMBAH DATA ---
+        function tambahData() {
+            isEditMode = false;
+            document.getElementById('formTitle').innerText = "TAMBAH ANGGOTA";
+            document.getElementById('inIdAnggota').value = '';
+            document.getElementById('inIdAnggota').disabled = false;
+            document.getElementById('inNama').value = '';
+            document.getElementById('inGender').value = '';
+            document.getElementById('inNoHp').value = '';
+            document.getElementById('inKelas').value = '';
+            toggleView('viewForm');
+        }
+
+        // --- 4. KLIK TOMBOL EDIT ---
+        function editData(id, nama, gender, no_hp, kelas) {
+            isEditMode = true;
+            document.getElementById('formTitle').innerText = "EDIT ANGGOTA";
+            document.getElementById('inIdAnggota').value = id;
+            document.getElementById('inIdAnggota').disabled = true; 
+            document.getElementById('inNama').value = nama;
+            document.getElementById('inGender').value = gender;
+            document.getElementById('inNoHp').value = no_hp;
+            document.getElementById('inKelas').value = kelas;
+            toggleView('viewForm');
+        }
+
+        // --- 5. POST / PUT: MENYIMPAN DATA KE DATABASE ---
+        async function simpanData() {
+            const payload = {
+                id_anggota: document.getElementById('inIdAnggota').value,
+                nama: document.getElementById('inNama').value,
+                jenis_kelamin: document.getElementById('inGender').value,
+                no_hp: document.getElementById('inNoHp').value,
+                kelas: document.getElementById('inKelas').value
+            };
+
+            if (!payload.id_anggota) { alert("ID Anggota wajib diisi!"); return; }
+
+            const url = isEditMode ? `${API_URL}/${payload.id_anggota}` : API_URL;
+            const method = isEditMode ? 'PUT' : 'POST';
+
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if(response.ok) {
+                    alert(isEditMode ? "Data Anggota berhasil diubah!" : "Data Anggota berhasil ditambahkan!");
+                    toggleView('viewTabel');
+                    loadDataAnggota(); 
+                } else {
+                    alert("Gagal menyimpan data anggota.");
+                }
+            } catch (error) {
+                console.error('Error saving data:', error);
+            }
+        }
+
+        // --- 6. DELETE: MENGHAPUS DATA ---
+        async function hapusData(id_anggota) {
+            if(confirm(`Apakah Anda yakin ingin menghapus anggota dengan ID: ${id_anggota}?`)) {
+                try {
+                    const response = await fetch(`${API_URL}/${id_anggota}`, { method: 'DELETE' });
+                    if(response.ok) {
+                        alert("Data Anggota berhasil dihapus!");
+                        loadDataAnggota(); 
+                    }
+                } catch (error) {
+                    console.error('Error deleting data:', error);
+                }
+            }
+        }
+    </script>
+</body>
+</html>

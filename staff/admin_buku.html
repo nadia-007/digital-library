@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Kelola Data Buku</title>
+    <link rel="stylesheet" href="admin_style.css">
+</head>
+<body>
+
+    <div class="dashboard-container">
+
+        <div class="sidebar" id="sidebar">
+            <div class="profile-section">
+                <div class="profile-icon">👤</div>
+                <div id="namaAdminTampil" style="font-weight: bold; font-size: 18px; text-transform: uppercase;">PERSON</div>
+                <div class="role-badge">Administrator</div>
+            </div>
+            <ul class="menu">
+                <a href="admin_dashboard.html">📊 Dashboard</a>
+                <a href="admin_buku.html" class="active">📖 Kelola Data</a>
+                <a href="admin_anggota.html">👥 Log Data</a>
+                <a href="admin_peminjaman.html">📄 Laporan</a>
+            </ul>
+            <a href="#" onclick="prosesLogout()" class="logout">🚪 Log Out</a>
+        </div>
+
+        <div class="main-content" id="mainContent">
+            
+            <div class="top-navbar">
+                <span id="hamburgerBtn" onclick="toggleSidebar()">☰</span>
+            </div>
+            
+            <div class="content-area">
+                <div class="card-box">
+                    
+                    <div id="viewTabel">
+                        <h2 class="page-title">DATA BUKU</h2>
+                        <div class="header-actions">
+                            <button class="btn-tambah" onclick="tambahData()">+ Tambah Data</button>
+                            <div style="position: relative; display: flex; align-items: center; gap: 10px;">
+                                <span style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); font-size: 18px; pointer-events: none; z-index: 2;">🔍</span>
+                                
+                                <input type="text" id="kolomCariAdmin" class="search-box" style="padding-left: 45px; width: 280px; height: 40px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-family: 'Poppins', sans-serif;" placeholder="Search ID, Judul, Pengarang..." onkeyup="handlePencarianAdmin()" autocomplete="off">
+                                
+                                <button class="btn-search" style="background-color: #1A1152; color: white; border: none; padding: 0 25px; height: 40px; border-radius: 8px; font-weight: 600; cursor: pointer; font-family: 'Poppins', sans-serif; transition: 0.3s;" onclick="handlePencarianAdmin()">
+                                    Search
+                                </button>
+                                
+                                <div id="kotakRekomendasi" style="display: none; position: absolute; top: 100%; left: 0; width: 280px; background: white; border: 1px solid #ccc; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.15); z-index: 999; max-height: 200px; overflow-y: auto; margin-top: 5px;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>NO</th>
+                                    <th>COVER</th> 
+                                    <th>ID BUKU</th>
+                                    <th>JUDUL BUKU</th>
+                                    <th>PENGARANG</th>
+                                    <th>PENERBIT</th>
+                                    <th>GENRE</th>
+                                    <th>STOK</th> <th>KELOLA</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelBukuBody">
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div id="viewForm" style="display: none;">
+                        <h2 class="page-title" id="formTitle">TAMBAH BUKU</h2>
+                        <div class="form-group"><label>ID BUKU</label><input type="text" id="inIdBuku"></div>
+                        <div class="form-group"><label>JUDUL BUKU</label><input type="text" id="inJudul"></div>
+                        <div class="form-group"><label>PENGARANG</label><input type="text" id="inPengarang"></div>
+                        <div class="form-group"><label>PENERBIT</label><input type="text" id="inPenerbit"></div>
+                        <div class="form-group"><label>GENRE</label><input type="text" id="inGenre"></div>
+                        
+                        <div class="form-group">
+                            <label>STOK BUKU</label>
+                            <input type="number" id="inStok" min="0" placeholder="Masukkan jumlah stok...">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>UPLOAD COVER BUKU (.jpg / .png)</label>
+                            <input type="file" id="inGambar" accept="image/*">
+                        </div>
+                        
+                        <div style="margin-top: 30px;">
+                            <button class="btn-simpan" onclick="simpanData()">SIMPAN</button>
+                            <button class="btn-batal" onclick="toggleView('viewTabel')">BATAL</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let isEditMode = false;
+        const API_URL = 'http://127.0.0.1:8000/api/buku';
+        let dataBukuLokal = []; 
+
+        document.addEventListener("DOMContentLoaded", function() {
+            let adminAktif = localStorage.getItem("namaAdminAktif");
+            if (!adminAktif) {
+                alert("Akses Ilegal! Anda harus Login terlebih dahulu.");
+                window.location.href = "admin_login.html";
+            } else {
+                document.getElementById("namaAdminTampil").innerText = adminAktif;
+            }
+        });
+
+        function prosesLogout() {
+            localStorage.removeItem("namaAdminAktif");
+            window.location.href = "admin_login.html";
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('collapsed');
+        }
+
+        window.onload = function() {
+            loadDataBuku();
+            document.addEventListener("click", function(e) {
+                if (e.target.id !== "kolomCariAdmin") {
+                    document.getElementById("kotakRekomendasi").style.display = "none";
+                }
+            });
+        };
+
+        function toggleView(viewId) {
+            document.getElementById('viewTabel').style.display = 'none';
+            document.getElementById('viewForm').style.display = 'none';
+            document.getElementById(viewId).style.display = 'block';
+        }
+
+        async function loadDataBuku() {
+            try {
+                const response = await fetch(API_URL);
+                dataBukuLokal = await response.json(); 
+                tampilkanKeTabel(dataBukuLokal);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+
+        function tampilkanKeTabel(daftarBuku) {
+            let tbody = document.getElementById('tabelBukuBody');
+            tbody.innerHTML = ''; 
+
+            daftarBuku.forEach((buku, index) => {
+                let fotoUrl = `http://127.0.0.1:8000/static/img/${buku.id_buku}.jpg?t=${new Date().getTime()}`;
+                
+                let row = `<tr>
+                    <td>${index + 1}</td>
+                    <td>
+                        <img src="${fotoUrl}" style="width: 55px; height: 75px; object-fit: cover; border-radius: 6px; border: 1px solid #ddd;" 
+                             onerror="this.src='https://via.placeholder.com/55x75/1E1450/FFFFFF?text=No+Cover'">
+                    </td>
+                    <td>${buku.id_buku}</td>
+                    <td>${buku.judul}</td>
+                    <td>${buku.pengarang}</td>
+                    <td>${buku.penerbit}</td>
+                    <td>${buku.genre}</td>
+                    <td><strong>${buku.stok || 0}</strong></td> <td>
+                        <button class="btn-action btn-edit" onclick="editData('${buku.id_buku}', '${buku.judul.replace(/'/g, "\\'")}', '${buku.pengarang.replace(/'/g, "\\'")}', '${buku.penerbit.replace(/'/g, "\\'")}', '${buku.genre.replace(/'/g, "\\'")}', '${buku.stok || 0}')">✏️</button>
+                        <button class="btn-action btn-delete" onclick="hapusData('${buku.id_buku}')">🗑️</button>
+                    </td>
+                </tr>`;
+                tbody.innerHTML += row;
+            });
+        }
+
+        function handlePencarianAdmin() {
+            let input = document.getElementById("kolomCariAdmin").value.toLowerCase();
+            let kotakBox = document.getElementById("kotakRekomendasi");
+            
+            if (input === "") {
+                kotakBox.style.display = "none";
+                tampilkanKeTabel(dataBukuLokal);
+                return;
+            }
+
+            kotakBox.innerHTML = ""; 
+            let setSaran = new Set(); 
+
+            dataBukuLokal.forEach(buku => {
+                if (buku.id_buku.toLowerCase().includes(input)) setSaran.add(buku.id_buku);
+                if (buku.judul.toLowerCase().includes(input)) setSaran.add(buku.judul);
+                if (buku.pengarang.toLowerCase().includes(input)) setSaran.add(buku.pengarang);
+            });
+
+            if (setSaran.size > 0) {
+                kotakBox.style.display = "block";
+                setSaran.forEach(saran => {
+                    let item = document.createElement("div");
+                    item.innerText = saran;
+                    item.style.padding = "10px 15px";
+                    item.style.cursor = "pointer";
+                    item.style.fontSize = "13px";
+                    item.style.color = "#333";
+                    item.style.borderBottom = "1px solid #eee";
+                    
+                    item.onmouseover = function() { this.style.background = "#f0f0f0"; };
+                    item.onmouseout = function() { this.style.background = "white"; };
+                    
+                    item.onclick = function() {
+                        document.getElementById("kolomCariAdmin").value = saran;
+                        kotakBox.style.display = "none";
+                        saringTabelMurni(saran.toLowerCase());
+                    };
+                    kotakBox.appendChild(item);
+                });
+            } else {
+                kotakBox.style.display = "none";
+            }
+
+            saringTabelMurni(input);
+        }
+
+        function saringTabelMurni(kataKunci) {
+            let tbody = document.getElementById('tabelBukuBody');
+            let tr = tbody.getElementsByTagName("tr");
+
+            for (let i = 0; i < tr.length; i++) {
+                let teksBaris = tr[i].innerText.toLowerCase();
+                if (teksBaris.includes(kataKunci)) {
+                    tr[i].style.display = ""; 
+                } else {
+                    tr[i].style.display = "none"; 
+                }
+            }
+        }
+
+        function tambahData() {
+            isEditMode = false;
+            document.getElementById('formTitle').innerText = "TAMBAH BUKU";
+            document.getElementById('inIdBuku').value = '';
+            document.getElementById('inIdBuku').disabled = false;
+            document.getElementById('inJudul').value = '';
+            document.getElementById('inPengarang').value = '';
+            document.getElementById('inPenerbit').value = '';
+            document.getElementById('inGenre').value = '';
+            document.getElementById('inStok').value = '0'; // BARU: Reset nilai stok input
+            document.getElementById('inGambar').value = ''; 
+            toggleView('viewForm');
+        }
+
+        // PERBAIKAN: Menambahkan parameter penangkap 'stok' pada fungsi edit
+        function editData(id, judul, pengarang, penerbit, genre, stok) {
+            isEditMode = true;
+            document.getElementById('formTitle').innerText = "EDIT BUKU";
+            document.getElementById('inIdBuku').value = id;
+            document.getElementById('inIdBuku').disabled = true;
+            document.getElementById('inJudul').value = judul;
+            document.getElementById('inPengarang').value = pengarang;
+            document.getElementById('inPenerbit').value = penerbit;
+            document.getElementById('inGenre').value = genre;
+            document.getElementById('inStok').value = stok; // BARU: Menampilkan data stok lama di form
+            document.getElementById('inGambar').value = ''; 
+            toggleView('viewForm');
+        }
+
+        async function simpanData() {
+            const payload = {
+                id_buku: document.getElementById('inIdBuku').value,
+                judul: document.getElementById('inJudul').value,
+                pengarang: document.getElementById('inPengarang').value,
+                penerbit: document.getElementById('inPenerbit').value,
+                genre: document.getElementById('inGenre').value,
+                stok: parseInt(document.getElementById('inStok').value) || 0 // BARU: Mengirim data stok ke database
+            };
+
+            if (!payload.id_buku) { alert("ID Buku tidak boleh kosong!"); return; }
+
+            const url = isEditMode ? `${API_URL}/${payload.id_buku}` : API_URL;
+            const method = isEditMode ? 'PUT' : 'POST';
+
+            try {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if(response.ok) {
+                    const fileInput = document.getElementById('inGambar');
+                    if (fileInput.files.length > 0) {
+                        const formData = new FormData();
+                        formData.append('gambar', fileInput.files[0]);
+
+                        await fetch(`http://127.0.0.1:8000/api/buku/upload/${payload.id_buku}`, {
+                            method: 'POST',
+                            body: formData
+                        });
+                    }
+
+                    alert(isEditMode ? "Data Buku & Cover berhasil diubah!" : "Data Buku & Cover berhasil ditambahkan!");
+                    toggleView('viewTabel');
+                    loadDataBuku(); 
+                } else {
+                    alert("Gagal menyimpan data.");
+                }
+            } catch (error) {
+                console.error('Error saving data:', error);
+            }
+        }
+
+        async function hapusData(id_buku) {
+            if(confirm(`Apakah kamu yakin ingin menghapus buku dengan ID: ${id_buku}?`)) {
+                try {
+                    const response = await fetch(`${API_URL}/${id_buku}`, { method: 'DELETE' });
+                    if(response.ok) {
+                        alert("Data berhasil dihapus!");
+                        loadDataBuku(); 
+                    }
+                } catch (error) {
+                    console.error('Error deleting data:', error);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
