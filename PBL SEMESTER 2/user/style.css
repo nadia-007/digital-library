@@ -1,0 +1,168 @@
+/* =======================================================
+   style.css - DESAIN KHUSUS HALAMAN USER (Siswa/Guru)
+   ======================================================= */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+:root {
+    --bg-main: #F0F0F0;
+    --purple-dark: #1E1450;
+    --card-bg: #FFFFFF;
+    --text-dark: #333;
+}
+
+body { 
+    margin: 0; 
+    padding: 0; 
+    font-family: 'Poppins', sans-serif; 
+    background-color: var(--bg-main); 
+    display: flex; 
+    flex-direction: column; 
+    min-height: 100vh;
+}
+
+/* --- NAVBAR --- */
+.navbar { 
+    background-color: var(--purple-dark); 
+    color: white; 
+    display: flex; 
+    align-items: center; 
+    padding: 15px 30px; 
+    margin: 10px; 
+    border-radius: 15px; 
+    gap: 30px; 
+}
+.navbar .logo { font-weight: 700; font-size: 18px; }
+.nav-links { display: flex; gap: 20px; flex-grow: 1; }
+.nav-links a { color: white; text-decoration: none; font-size: 14px; opacity: 0.7; transition: 0.3s;}
+.nav-links a.active, .nav-links a:hover { opacity: 1; font-weight: 700;}
+.user-icon { background: white; color: var(--purple-dark); width: 35px; height: 35px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; }
+
+/* --- MAIN CONTAINER --- */
+.container { padding: 20px 40px; flex-grow: 1; }
+
+/* --- FILTER & SEARCH BAR --- */
+.filter-bar { 
+    display: flex; gap: 15px; margin-bottom: 30px; align-items: center; 
+}
+.dropdown-buku { 
+    background-color: var(--purple-dark); 
+    color: white; 
+    padding: 12px 20px; 
+    border-radius: 8px; 
+    border: none; 
+    width: 250px; 
+    font-family: 'Poppins', sans-serif; 
+    cursor: pointer; 
+    font-size: 14px;
+    font-weight: 600;
+}
+.search-box { 
+    flex-grow: 1; 
+    display: flex; 
+    align-items: center; 
+    background: white; 
+    border-radius: 8px; 
+    padding: 5px; 
+    border: 1px solid #ccc; 
+}
+.search-box input { 
+    border: none; outline: none; width: 100%; padding: 10px; font-family: 'Poppins', sans-serif; 
+}
+.btn-search { 
+    background-color: var(--purple-dark); color: white; border: none; padding: 10px 30px; border-radius: 6px; cursor: pointer; font-family: 'Poppins', sans-serif; font-weight: 600;
+}
+
+/* --- KOTAK BUKU (CARD) --- */
+#daftarBukuContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+.book-card { 
+    background-color: var(--card-bg); 
+    border-radius: 15px; 
+    display: flex; 
+    padding: 20px; 
+    align-items: center; 
+    gap: 25px; 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05); 
+}
+.book-cover { 
+    width: 120px; height: 180px; 
+    background-color: #ddd; 
+    border-radius: 10px; 
+    object-fit: cover; 
+    box-shadow: 2px 2px 10px rgba(0,0,0,0.2);
+}
+.book-details { flex-grow: 1; }
+.book-details h3 { margin: 0 0 10px 0; font-size: 18px; color: var(--purple-dark); font-weight: 700;}
+.book-details table { font-size: 13px; color: #555; }
+.book-details table td { padding: 5px 0; }
+.book-details table td:first-child { width: 100px; font-weight: 600; }
+
+/* TOMBOL PINJAM */
+.btn-pinjam { 
+    background-color: var(--purple-dark); 
+    color: white; 
+    border: none; 
+    padding: 12px 30px; 
+    border-radius: 8px; 
+    font-weight: 600; 
+    cursor: pointer; 
+    font-family: 'Poppins', sans-serif;
+    transition: 0.3s;
+}
+.btn-pinjam:hover { background-color: #31217a; }
+
+/* --- PESAN LOADING/KOSONG --- */
+.empty-message { text-align: center; color: #aaa; font-size: 18px; font-weight: bold; margin-top: 50px; }
+
+/* --- FOOTER --- */
+footer { 
+    background-color: var(--purple-dark); 
+    color: white; 
+    padding: 30px 40px; 
+    margin-top: auto; 
+    display: flex; justify-content: space-between; 
+    align-items: center;
+}
+footer h4 { margin: 0 0 10px 0; }
+footer p { margin: 5px 0; font-size: 12px; color: #ccc;}
+
+/* --- MODAL (POP UP LOGIN & QR) --- */
+.modal { 
+    display: none; position: fixed; z-index: 1000; left: 0; top: 0; 
+    width: 100%; height: 100%; 
+    background-color: rgba(0,0,0,0.5); 
+    justify-content: center; align-items: center; 
+}
+.modal-content { 
+    background-color: #F5F5F5; 
+    border-radius: 15px; 
+    width: 450px; 
+    overflow: hidden; 
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+}
+.modal-header { 
+    background-color: var(--purple-dark); 
+    color: white; 
+    padding: 15px 20px; 
+    display: flex; justify-content: space-between; 
+    align-items: center; font-weight: 600; 
+}
+.close-btn { 
+    background: white; color: var(--purple-dark); border: none; 
+    width: 25px; height: 25px; cursor: pointer; font-weight: bold; border-radius: 3px;
+}
+.modal-body { padding: 30px; }
+.modal-body label { display: block; margin-bottom: 8px; font-size: 14px; font-weight: 600; }
+.modal-body input { 
+    width: 100%; padding: 12px; margin-bottom: 20px; 
+    border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; 
+    font-family: 'Poppins', sans-serif;
+}
+.btn-modal-login { 
+    background-color: #E0E0E0; color: var(--purple-dark); border: none; 
+    padding: 10px 30px; border-radius: 20px; font-weight: 700; cursor: pointer; 
+    float: right; font-family: 'Poppins', sans-serif;
+}

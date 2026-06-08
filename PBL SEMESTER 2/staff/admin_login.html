@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Database - Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --purple-dark: #1A1152;
+            --bg-main: #D3D3D3; /* Abu-abu terang sesuai mockup */
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-main);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* --- BAR ATAS "DATABASE" --- */
+        .top-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: var(--purple-dark);
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+            font-weight: 700;
+            letter-spacing: 2px;
+            font-size: 18px;
+        }
+
+        /* --- KOTAK LOGIN --- */
+        .login-card {
+            width: 350px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0px 10px 30px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Bagian Atas Putih */
+        .login-top {
+            background-color: white;
+            height: 140px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        /* Ikon Profile Bulat */
+        .profile-icon {
+            font-size: 50px;
+            color: var(--purple-dark);
+            border: 3px solid var(--purple-dark);
+            border-radius: 50%;
+            width: 70px;
+            height: 70px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Bagian Bawah Ungu Gelap */
+        .login-bottom {
+            background-color: var(--purple-dark);
+            padding: 30px 40px 40px 40px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            margin-top: -20px; /* Efek melengkung menimpa bagian putih */
+        }
+
+        .login-bottom h3 {
+            margin: 0 0 20px 0;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        /* Input Group (Username, Email, Password) */
+        .input-group {
+            display: flex;
+            align-items: center;
+            background-color: white;
+            border-radius: 25px;
+            padding: 5px 15px;
+            margin-bottom: 15px;
+        }
+
+        .input-group span {
+            color: #888;
+            margin-right: 10px;
+            font-size: 14px;
+        }
+
+        .input-group input {
+            border: none;
+            outline: none;
+            width: 100%;
+            padding: 8px 0;
+            font-family: 'Poppins', sans-serif;
+            font-size: 13px;
+        }
+
+        /* Tombol Login */
+        .btn-login {
+            background-color: #A9A9A9; /* Abu-abu sesuai mockup */
+            color: var(--purple-dark);
+            border: none;
+            padding: 10px;
+            border-radius: 20px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+            width: 120px;
+            align-self: center; /* Memposisikan tombol di tengah */
+            margin-top: 15px;
+            transition: 0.3s;
+        }
+
+        .btn-login:hover {
+            background-color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">DATABASE</div>
+
+    <div class="login-card">
+        
+        <div class="login-top">
+            <div class="profile-icon">👤</div>
+        </div>
+
+        <div class="login-bottom">
+            <h3>Login</h3>
+            
+            <div class="input-group">
+                <span>👤</span>
+                <input type="text" id="inUsername" placeholder="Username">
+            </div>
+            
+            <div class="input-group">
+                <span>📧</span>
+                <input type="email" id="inEmail" placeholder="Email">
+            </div>
+
+            <div class="input-group">
+                <span>🔒</span>
+                <input type="password" id="inPassword" placeholder="Password">
+            </div>
+
+            <button class="btn-login" onclick="prosesLogin()">Login</button>
+        </div>
+        
+    </div>
+
+    <script>
+        function prosesLogin() {
+            let user = document.getElementById('inUsername').value;
+            let email = document.getElementById('inEmail').value;
+            let pass = document.getElementById('inPassword').value;
+
+            // 1. Cek apakah ada yang kosong
+            if (user === "" || email === "" || pass === "") {
+                alert("Akses Ditolak! Username, Email, dan Password wajib diisi.");
+                return;
+            }
+
+            // 2. Jika isi, simpan username ke memori browser (localStorage)
+            localStorage.setItem("namaAdminAktif", user);
+
+            // 3. Pindah ke halaman Dashboard
+            window.location.href = 'admin_dashboard.html';
+        }
+    </script>
+</body>
+</html>
